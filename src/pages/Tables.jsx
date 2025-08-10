@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
 import BottomNav from '../components/shared/BottomNav'
 import TableCard from '../components/tables/TableCard'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 const Tables = () => {
   const [activeFilter, setActiveFilter] = useState('All');
+  const location= useLocation();
+  const navigate = useNavigate();
+
+  const orderInfo= location.state || {};
 
   const tables = [
     {
@@ -113,12 +118,23 @@ const Tables = () => {
     }
   ];
 
-  const filters = ['All', 'Booked'];
+  const filters = ['All', 'Booked']; 
 
   const filteredTables = activeFilter === 'All' 
     ? tables 
     : tables.filter(table => table.status === activeFilter);
 
+
+    const handleTableSelect= (table) => {
+      if (table.status !== 'Available') return;
+
+      navigate("/menu",{
+        state:{
+          ...orderInfo,
+          tableNumber: table.tableNumber,
+        }
+      });
+  };
   return (
     <div className='bg-[#1f1f1f] min-h-screen pb-20'>
       <div className='p-6'>
@@ -149,13 +165,18 @@ const Tables = () => {
         {/* Tables Grid */}
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 overflow-y-auto scrollbar-hide max-h-[calc(100vh-240px)]'>
           {filteredTables.map((table) => (
+            <div key={table.id}
+             onClick={() => handleTableSelect(table)}
+           className={table.status === "Available" ? "cursor-pointer hover:border-[#f6b100]" : "opacity-60 cursor-not-allowed"}
+            >
             <TableCard
-              key={table.id}
+              
               tableNumber={table.tableNumber}
               status={table.status}
               customerInitials={table.customerInitials}
               customerName={table.customerName}
             />
+            </div>
           ))}
         </div>
 
